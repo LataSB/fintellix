@@ -1,0 +1,138 @@
+package com.fintellix.test.automation;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.ITestContext;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Listeners;
+
+import com.fintellix.test.automation.utils.CustomReporter;
+import com.fintellix.test.automation.utils.ExcelParser;
+import com.fintellix.test.automation.utils.TestProperties;
+import com.fintellix.test.automation.utils.WebDriverFactory;
+@Listeners({CustomReporter.class})
+/*
+ * @Listeners( {  } )
+ */
+public class TestFactory {
+	ArrayList<TestCaseList> allTests;
+	Logger logger = LoggerFactory.getLogger(TestFactory.class);
+	static int priority = 1;
+
+	/*
+	 * public TestFactory(ArrayList <TestCaseList> allTests){ this.allTests =
+	 * allTests; }
+	 */
+
+	@Factory(dataProvider = "getTestListsBasedOnConfig")
+	public Object[] createTestFromList(TestCaseList testCaseList, HashMap<String, ArrayList<TestStep>> customCommands) {
+		logger.debug("Start createTestFromList method");
+		ArrayList<Object> testRunnerList = new ArrayList<Object>();
+
+		try {
+
+			if (null == testCaseList) {
+				logger.error("testCaseList is null");
+			} else {
+				logger.debug("Test case list name is " + testCaseList.getTestcaseListName());
+			}
+			String testCaseListName = testCaseList.getTestcaseListName();
+			int executionOrder = testCaseList.getExecutionOrder();
+			String testType = testCaseList.getTestListType();
+			for (TestCase testCase : testCaseList.getTestCases()) {
+				testCase.setPriority(priority++);
+				testCase.setTestCaseListName(testCaseListName);
+				if(testType.equalsIgnoreCase(TestCaseList.BROWSER)){
+					testRunnerList.add(new BrowserTestRunner(testCase, testCaseList.getPreTestSetup(),
+							testCaseList.getPostTestSetup(), customCommands));
+				}else if(testType.equalsIgnoreCase(TestCaseList.REST_API)){
+					testRunnerList.add(new RESTUrlTestRunner(testCase, testCaseList.getPreTestSetup(),
+							testCaseList.getPostTestSetup(), customCommands));
+				}else{
+					throw new Exception("Check Test Configuration Sheet. Unknow Test Type "+ testType);
+				}
+				
+			}
+
+			return testRunnerList.toArray();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return null;
+
+	}
+
+	@DataProvider
+	public Object[][] getTestListsBasedOnConfig(ITestContext context) {
+		String testDataFile = context.getCurrentXmlTest().getParameter("testDataFile");
+		logger.debug("Start createTestFromList method:in getTestListsBasedOnConfig DataProvider");
+		if (null == testDataFile) {
+			testDataFile = TestProperties.getProperty("test.datafile");
+		}
+		try {
+			logger.info("Processing Test Data file " + testDataFile);
+			ExcelParser excelDoc = new ExcelParser(testDataFile);
+			HashMap<String, TestCaseList> allTests = excelDoc.getAllTestCaseLists();
+			TestConfig testConfig = excelDoc.getTestConfig();
+			ArrayList<HashMap<String, Object>> testSheetList = new ArrayList<HashMap<String, Object>>(
+					testConfig.getTestConfig().values());
+			HashMap<String, ArrayList<TestStep>> customCommands = excelDoc.getCustomCommands();
+			
+
+			// to sort the sheet names based on priority set in Test
+			// Configuration
+			Collections.sort(testSheetList, new Comparator<HashMap<String, Object>>() {
+				public int compare(HashMap<String, Object> h1, HashMap<String, Object> h2) {
+					double executionOrder1 = (double) h1.get("executionOrder");
+					double executionOrder2 = (double) h2.get("executionOrder");
+					return (int) (executionOrder1 - executionOrder2);
+				}
+			});
+
+			ArrayList<TestCaseList> factoryInput = new ArrayList<TestCaseList>();
+			for (HashMap<String, Object> sheetConfig : testSheetList) {
+				String sheetName = (String) sheetConfig.get("sheetName");
+				logger.debug("1. Adding test cases from sheet " + sheetName);
+				TestCaseList tList = allTests.get(sheetName);
+				if (null == tList) {
+					logger.error("Test Case Sheet " + sheetName + " not found. skipping same");
+					continue;
+				}
+				String enabled = (String) sheetConfig.get("enabled");
+				if (!enabled.equalsIgnoreCase("Y")) {
+					logger.debug("Sheet " + sheetName + " is not enabled. Skipping same");
+					continue;
+				}
+				logger.debug("Adding sheet " + sheetName + " to list");
+				factoryInput.add(tList);
+			}
+
+			Object[][] retArray = new Object[factoryInput.size()][2];
+			for (int index = 0; index < factoryInput.size(); index++) {
+				factoryInput.get(index).setExecutionOrder(index + 1);
+				retArray[index][0] = factoryInput.get(index);
+				retArray[index][1] = customCommands;
+				logger.debug("index=" + index + " name=" + factoryInput.get(index).getTestcaseListName());
+			}
+			return retArray;
+		} catch (Exception e) {
+			logger.error("Error while initiating tests", e);
+			return null;
+		}
+
+	}
+
+	@AfterSuite
+	public void cleanUpAfterSuite() {
+		logger.info("Executing After Suite");
+		WebDriverFactory.releaseAll();
+	}
+
+}

@@ -1,0 +1,20 @@
+userid=id:username
+password=id:password
+loginBtn=name:loginbtn
+errorMessage=xpath://div[@class='login-errormsg-box']
+termsandConditionCheckBoxOnLogin=xpath://input[@class = 'conditionCheck']
+termsandConditionAcceptButton=xpath://div[@class = 'accept']
+
+#For Lloyds User
+useAnotherAccount=xpath://div[text()='Use another account']
+signInWithAzureBtn=xpath://div[@id='signinbtn']
+microsoftEmail=xpath://input[@type='email']
+microsoftNextBtn=xpath://input[@value='Next']
+lloydsImgLogo=xpath://img[@class='banner-logo']
+lloydsPwdInputBox=xpath://input[@name='passwd']
+llyodsSignInBtn=xpath://span[@id='submitButton']
+microsoftStaySignIn=xpath://div[text()='Stay signed in?']
+microsoftNoBtn=xpath://input[@value='No']
+microsoftUseAnotherAccount=xpath://div[text()='Use another account']
+microsoftPwdInputBox=xpath://input[@name='passwd' and starts-with(@class, 'form')]
+microsoftSignInBtn=xpath://input[starts-with(@value, 'Sign')]

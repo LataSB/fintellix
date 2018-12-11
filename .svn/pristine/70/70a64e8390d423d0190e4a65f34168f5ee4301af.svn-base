@@ -1,0 +1,62 @@
+#Testting on local machine or a Selenium hub
+#in case below property is empty, tests will be executed on local machine.
+#selenium.hubUrl = http://172.16.1.18:5050/wd/hub
+#selenium.hubUrl = http://localhost:5050/wd/hub
+
+#Application url & login details
+#application.url = http://verisk.uksouth.cloudapp.azure.com/application/login.htm
+#application.url = http://172.50.3.9:11080/fintellix
+#application.url = http://172.50.3.9:15080/bizscore
+#application.url = http://172.50.3.9:16080/application/
+#application.url = http://test-appsvr.icreate.bi:6060/fintellix/
+application.url = http://app31-test.icreate.bi:6060/fintellix/
+#application.url = http://172.50.3.3:8080/bizscore/
+
+#buildnumber = 0000108
+
+buildnumber = 21-09-2018
+ 
+#application.userid = PerfTestUser1
+application.userid = admin
+application.password = Welcome1
+
+admin2=mtest
+
+application.userChecker = admin
+application.userMaker = magent2
+
+test.classRoot = com.fintellix.test.platformtests.PageClasses.
+#test.datafile = D:\\ProjectsShared\\platform_Lloyds_performanceScenarios.xlsx
+test.datafile = D:\FunctionalAutomation\FunctionalAutomation\platform-3.1.0-debug.xlsx
+
+#Testing configurations supported browsers are IE, chrome and firefox
+#valid values chrome, firefox, internet explorer, phantomjs
+test.browser = chrome
+
+#if parallel executions are enabled, multiple tests will run simultaneously, otherwise they follow sequential order.
+test.enableParallelExecution = false
+test.numberOfparallelTests = 4
+test.timeoutInSeconds = 15
+test.caputureScreenOnFailure = true
+test.caputureScreenOnSuccess = false
+#valid values are from 1 to 10, 1 being least logs and 10 being most logs.
+test.log.verbose.level = 3
+
+
+
+#ATU Reporting related switches.
+#if tests are run in parallel mode, ATU reports will not be supported.
+test.atu.enableATUReporting = false
+test.atu.enableStepLevelReporting = false
+test.atu.enableStepLevelScreenShot = false
+
+#download directory path
+test.downloadDir = //download path will be created at platform Target folder at run time
+
+#upload directory path
+test.uploadDir = ../../Uploads
+
+#upload Reference files for presetup
+test.uploadReferences = ../../uploadReferences
+
+

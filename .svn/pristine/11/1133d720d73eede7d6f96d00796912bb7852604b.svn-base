@@ -1,0 +1,399 @@
+package com.fintellix.test.automation.utils;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+
+import com.fintellix.test.automation.TestStep;
+
+public class BrowserCommands {
+	public static final String OPEN_URL = "OPEN_URL";
+	public static final String INPUT_TEXT = "INPUT_TEXT";
+	public static final String INPUT_TEXT_IF_NOT_NULL = "INPUT_TEXT_IF_NOT_NULL";
+	public static final String CLICK = "CLICK";
+	public static final String CLICK_IF_TRUE = "CLICK_IF_TRUE";
+	public static final String DOUBLE_CLICK = "DOUBLE_CLICK";
+	public static final String TEXT_EQUAL = "TEXT_EQUAL";
+	public static final String CHECK_IF_VISIBLE = "CHECK_IF_VISIBLE";
+	public static final String CHECK_IF_CONTAINS_TEXT = "CHECK_IF_CONTAINS_TEXT";
+	public static final String CLICK_WITH_PARAM = "CLICK_WITH_PARAM";
+	public static final String QUERY_RESULT_EQUAL = "QUERY_RESULT_EQUAL";
+	public static final String GOTO_MENU = "GOTO_MENU";
+	public static final String WAIT_UNTIL_VISIBLE = "WAIT_UNTIL_VISIBLE";
+	public static final String CLICK_ALERT_OK = "CLICK_ALERT_OK";
+	public static final String WAIT_UNTIL_CLICKABLE = "WAIT_UNTIL_CLICKABLE";
+	public static final String KEY_DOWN = "KEY_DOWN";
+	public static final String SELECT_DROPDOWN_EXT = "SELECT_DROPDOWN_EXT";
+	public static final String SELECT_DROPDOWN = "SELECT_DROPDOWN";
+	public static final String SELECT_DROPDOWN_EXT_IF_NOT_NULL = "SELECT_DROPDOWN_EXT_IF_NOT_NULL";
+	public static final String CLICK_IF_PRESENT = "CLICK_IF_PRESENT";
+
+	Logger logger = LoggerFactory.getLogger(BrowserCommands.class);
+
+	private HashMap<String, ArrayList<TestStep>> customCommands;
+
+	private HashMap<String, Object> testClasses = new HashMap<String, Object>();
+
+	public BrowserCommands() {
+		super();
+	}
+
+	public BrowserCommands(HashMap<String, ArrayList<TestStep>> customCommands) {
+		super();
+		this.customCommands = customCommands;
+	}
+
+	/*
+	 * public static final String OPEN_URL = "OPEN_URL"; public static final
+	 * String OPEN_URL = "OPEN_URL"; public static final String OPEN_URL =
+	 * "OPEN_URL"; public static final String OPEN_URL = "OPEN_URL"; public
+	 * static final String OPEN_URL = "OPEN_URL"; public static final String
+	 * OPEN_URL = "OPEN_URL";
+	 */
+
+	public HashMap<String, ArrayList<TestStep>> getCustomCommands() {
+		return customCommands;
+	}
+
+	public void setCustomCommands(HashMap<String, ArrayList<TestStep>> customCommands) {
+		this.customCommands = customCommands;
+	}
+
+	public void executeCommand(WebDriver driver, TestStep testStep) throws Throwable {
+		logger.debug("Executing " + testStep);
+		String command = testStep.getCommand();
+		String pageName = testStep.getPageName();
+		String fieldName = testStep.getFieldName();
+		String parameter1 = testStep.getParameter1();
+		String parameter2 = testStep.getParameter2();
+		String parameter3 = testStep.getParameter3();
+		String parameter4 = testStep.getParameter4();
+		String parameter5 = testStep.getParameter5();
+		String parameter6 = testStep.getParameter6();
+		String parameter7 = testStep.getParameter7();
+		String parameter8 = testStep.getParameter8();
+		String parameter9 = testStep.getParameter9();
+		String parameter10 = testStep.getParameter10();
+		String parameter11 = testStep.getParameter11();
+		String parameter12 = testStep.getParameter12();
+		String fieldText;
+		By fieldLocator = null;
+		WebElement element = null;
+		Boolean elementPresent = true;
+
+		if (null != fieldName && !fieldName.equalsIgnoreCase("")) {
+			if (command.equalsIgnoreCase(CLICK_WITH_PARAM)) {
+				fieldLocator = ObjectRepository.locateElement(pageName, fieldName, parameter1);
+			} else {
+				fieldLocator = ObjectRepository.locateElement(pageName, fieldName);
+
+			}
+			
+			if(command.equalsIgnoreCase(CLICK_IF_PRESENT)) {
+				try {
+					element = driver.findElement(fieldLocator);
+				}catch(Exception e) {
+					logger.info("looks like element is not available.. so skipping click exception is: "+e);
+					elementPresent = false;
+				}
+			}else {
+				element = driver.findElement(fieldLocator);
+			}
+			
+
+		}
+
+		String connName, query, query_result;
+		int waitTime;
+		WebDriverWait wait;
+		switch (command) {
+		case BrowserCommands.OPEN_URL:
+			System.out.println("URL of app is:"+parameter1);
+			//driver.get(parameter1);
+			driver.navigate().to(parameter1);
+			Thread.sleep(5000);
+			System.out.println(driver.getCurrentUrl());
+			break;
+		case BrowserCommands.INPUT_TEXT_IF_NOT_NULL:
+			if (null == parameter1 || parameter1.equalsIgnoreCase("")) {
+				break;
+			}
+		case BrowserCommands.INPUT_TEXT:
+			element.sendKeys(parameter1);
+			break;
+		case BrowserCommands.CLICK_IF_TRUE:
+			if (!parameter1.equalsIgnoreCase("true")) {
+				break;
+			}
+		case BrowserCommands.CLICK_WITH_PARAM:
+		case BrowserCommands.CLICK:
+			element.click();
+			
+			break;
+		case BrowserCommands.DOUBLE_CLICK:
+			Actions action = new Actions(driver).doubleClick(element);
+			action.build().perform();
+			break;
+		case BrowserCommands.TEXT_EQUAL:
+			fieldText = element.getText();
+			Assert.assertEquals(fieldText, parameter1);
+			break;
+		case BrowserCommands.CHECK_IF_VISIBLE:
+			if (!element.isDisplayed()) {
+				throw new Exception("Element is not visible :" + pageName + ":" + fieldName);
+			}
+			break;
+		case BrowserCommands.CHECK_IF_CONTAINS_TEXT:
+			fieldText = element.getText();
+			Assert.assertTrue(fieldText.contains(parameter1));
+			break;
+		case BrowserCommands.CLICK_IF_PRESENT:
+			if(elementPresent) {
+				element.click();
+			}
+			break;
+		case BrowserCommands.QUERY_RESULT_EQUAL:
+			connName = parameter1;
+			query = parameter2;
+			String expectedResult = parameter3;
+			if (null == expectedResult || expectedResult.equalsIgnoreCase("")) {
+				throw new Exception("Expected result not specified.");
+			}
+			query_result = DBUtils.getSingleRow(query, connName);
+			Assert.assertEquals(query_result, expectedResult);
+			break;
+		case BrowserCommands.GOTO_MENU:
+			connName = "app";
+			String appBaseUrl = TestProperties.getProperty("application.url");
+			if (!appBaseUrl.endsWith("/")) {
+				appBaseUrl = appBaseUrl + "/";
+			}
+			logger.debug("GOTO_MENU : base url =" + appBaseUrl);
+			String menuUrl;
+			String functionalityName = parameter1.toUpperCase();
+			/*query = "SELECT URL FROM VYASAFUNCTIONALITYMASTER ";
+			query += " WHERE UPPER(FUNCTIONALITYNAME) = '" + functionalityName + "'";
+			query += " OR UPPER(FUNCTIONALITYDISPLAYNAME) = '" + functionalityName + "'";*/
+			
+			query = "SELECT URL FROM VYASAFUNCTIONALITYMASTER ";
+			query += " WHERE UPPER(FUNCTIONALITYDISPLAYNAME) = '" + functionalityName + "'" +" and ISACTIVE = '1'";
+			//query += "AND ROWNUM < 2";
+			query_result = DBUtils.getSingleRow(query, connName);
+			if (null != query_result) {
+				menuUrl = query_result;
+				logger.debug("GOTO_MENU : menuUrl  =" + menuUrl);
+				String fullUrl = appBaseUrl + menuUrl +"&concatenatedParentIds";
+				System.out.println("url to navigate is>>>>> "+fullUrl);
+				driver.get(fullUrl);
+			} else {
+				throw new Exception("Functionality/Menu not found: " + parameter1);
+			}
+			break;
+
+		case BrowserCommands.WAIT_UNTIL_VISIBLE:
+
+			try {
+				waitTime = Integer.parseInt(parameter1);
+				logger.debug("Wait time for element is " + waitTime);
+			} catch (Exception e) {
+				logger.error("Illegal wait period for WAIT_UNTIL_VISIBLE command", e);
+				waitTime = 20;
+			}
+			wait = new WebDriverWait(driver, waitTime);
+			wait.until(ExpectedConditions.visibilityOf(element));
+			logger.debug("Exiting wait event");
+			break;
+		case BrowserCommands.WAIT_UNTIL_CLICKABLE:
+			try {
+				waitTime = Integer.parseInt(parameter1);
+				logger.debug("Wait time for element is " + waitTime);
+			} catch (Exception e) {
+				logger.error("Illegal wait period for WAIT_UNTIL_VISIBLE command", e);
+				waitTime = 10;
+			}
+			wait = new WebDriverWait(driver, waitTime);
+			wait.until(ExpectedConditions.elementToBeClickable(element));
+			logger.debug("Exiting wait event");
+			break;
+		case BrowserCommands.CLICK_ALERT_OK:
+			Alert alert = driver.switchTo().alert();
+			alert.accept();
+			break;
+		case BrowserCommands.KEY_DOWN:
+			element.sendKeys(Keys.DOWN);
+			break;
+		case BrowserCommands.SELECT_DROPDOWN_EXT_IF_NOT_NULL:
+			if (null == parameter1 || parameter1.equalsIgnoreCase("")) {
+				break;
+			}
+		case BrowserCommands.SELECT_DROPDOWN_EXT:
+			element.sendKeys(Keys.DOWN);
+			fieldLocator = ObjectRepository.locateElement("Common", "Drop_down_list_item", parameter1);
+			WebElement element2 = driver.findElement(fieldLocator);
+			wait = new WebDriverWait(driver, 10);
+			wait.until(ExpectedConditions.elementToBeClickable(element2));
+			element2.click();
+			break;
+
+		default:
+			if (null != this.customCommands) {
+				ArrayList<TestStep> customCommandSteps = (ArrayList<TestStep>) this.customCommands.get(command);
+				if (null != customCommandSteps) {
+					// Check in parameter 1 is defined for custom command. If
+					// yes, set value in a HashMap.
+					HashMap<String, String> customCommandArgs = new HashMap<String, String>();
+					if (null != parameter1 && !parameter1.equalsIgnoreCase("")) {
+						String[] args = parameter1.split("\\|");
+						for (int index = 0; index < args.length; index++) {
+							//added this if statement for parameterizing custom commands
+							if (args[index].startsWith("${") && args[index].endsWith("}")) {
+								String propertyName = args[index].substring(2, args[index].length() - 1);
+								String propertyValue = TestProperties.getProperty(propertyName);
+								if (null != propertyValue) {
+									logger.debug("Substitution : " + args[index] + " = " + propertyValue);
+									args[index] = propertyValue;
+								} else {
+									logger.debug("Skip substition for " + args[index]);
+								}
+							}							
+							
+							customCommandArgs.put("$" + (index + 1), args[index]);
+							logger.debug("Custom argument:" + "$" + (index + 1) + " value:" + args[index]);
+						}
+					}
+
+					for (TestStep customStep : customCommandSteps) {
+						this.executeCommand(driver, setCustomCommandParams(customStep, customCommandArgs));
+					}
+				} else {
+					try {
+						
+						String rootClass = TestProperties.getProperty("test.classRoot");
+						String className = rootClass+command.trim();
+						System.out.println(className);
+						String methodName = pageName.trim();
+						if (!testClasses.containsKey(className)) {
+							Class<?> testClassDefinition = Class.forName(className);
+							Constructor<?> stdConstructor = testClassDefinition.getConstructor(WebDriver.class);
+							Object testClassInstance = stdConstructor.newInstance(new Object[] { driver });
+							testClasses.put(className, testClassInstance);
+						}
+						Object testClassInstance = testClasses.get(className);
+						//testClasses.remove(className);
+						
+						System.out.println(driver +" "+testClassInstance);
+
+						Method testMethod;
+						try {
+							testMethod = testClassInstance.getClass().getMethod(methodName, null);
+							System.out.println(testMethod);
+							testMethod.invoke(testClassInstance, null);
+						} catch (NoSuchMethodException e) {
+							
+								testMethod = testClassInstance.getClass().getMethod(methodName, TestStep.class);
+								testMethod.invoke(testClassInstance, new Object[] { testStep });
+							
+							//e.printStackTrace();
+						}
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+						throw new Exception(
+								"Command not found [built in commands, custom commands, class based commands] "
+										+ command + " "+e.getMessage());
+
+					}catch(java.lang.reflect.InvocationTargetException e1){
+						if(null != e1.getCause()){
+							throw e1.getCause();
+						}
+					}
+
+				}
+			} else {
+				throw new Exception("Custom Command Definition not found for " + command);
+			}
+		}
+
+	}
+
+	private TestStep setCustomCommandParams(TestStep customStep, HashMap<String, String> commandArgs) {
+		TestStep retStep = new TestStep(customStep);
+		String parameter1 = customStep.getParameter1();
+		String parameter2 = customStep.getParameter2();
+		String parameter3 = customStep.getParameter3();
+		String parameter4 = customStep.getParameter4();
+		String parameter5 = customStep.getParameter5();
+		String parameter6 = customStep.getParameter6();
+		String parameter7 = customStep.getParameter7();
+		String parameter8 = customStep.getParameter8();
+		String parameter9 = customStep.getParameter9();
+		String parameter10 = customStep.getParameter10();
+		String parameter11 = customStep.getParameter11();
+		String parameter12 = customStep.getParameter12();
+		String parameter13 = customStep.getParameter13();
+		String parameter14 = customStep.getParameter14();
+		String parameter15 = customStep.getParameter15();
+		if (null != parameter1 && null != commandArgs.get(parameter1)) {
+			logger.debug("Retrived from args" + (String) commandArgs.get(parameter1));
+			retStep.setParameter1((String) commandArgs.get(parameter1));
+		}
+		if (null != parameter2 && null != commandArgs.get(parameter2)) {
+			retStep.setParameter2((String) commandArgs.get(parameter2));
+		}
+		if (null != parameter3 && null != commandArgs.get(parameter3)) {
+			retStep.setParameter3((String) commandArgs.get(parameter3));
+		}
+		if (null != parameter4 && null != commandArgs.get(parameter4)) {
+			retStep.setParameter4((String) commandArgs.get(parameter4));
+		}
+		if (null != parameter5 && null != commandArgs.get(parameter5)) {
+			retStep.setParameter5((String) commandArgs.get(parameter5));
+		}
+		if (null != parameter6 && null != commandArgs.get(parameter6)) {
+			retStep.setParameter6((String) commandArgs.get(parameter6));
+		}
+		if (null != parameter7 && null != commandArgs.get(parameter7)) {
+			retStep.setParameter7((String) commandArgs.get(parameter7));
+		}
+		if (null != parameter8 && null != commandArgs.get(parameter8)) {
+			retStep.setParameter8((String) commandArgs.get(parameter8));
+		}
+		if (null != parameter9 && null != commandArgs.get(parameter9)) {
+			retStep.setParameter9((String) commandArgs.get(parameter9));
+		}
+		if (null != parameter10 && null != commandArgs.get(parameter10)) {
+			retStep.setParameter10((String) commandArgs.get(parameter10));
+		}
+		if (null != parameter11 && null != commandArgs.get(parameter11)) {
+			retStep.setParameter11((String) commandArgs.get(parameter11));
+		}
+		if (null != parameter12 && null != commandArgs.get(parameter12)) {
+			retStep.setParameter12((String) commandArgs.get(parameter12));
+		}
+		if (null != parameter13 && null != commandArgs.get(parameter13)) {
+			retStep.setParameter13((String) commandArgs.get(parameter13));
+		}
+		if (null != parameter14 && null != commandArgs.get(parameter14)) {
+			retStep.setParameter14((String) commandArgs.get(parameter14));
+		}
+		if (null != parameter15 && null != commandArgs.get(parameter15)) {
+			retStep.setParameter15((String) commandArgs.get(parameter15));
+		}
+
+		logger.debug("Updated custom command" + customStep);
+		return retStep;
+	}
+
+}

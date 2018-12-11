@@ -1,0 +1,163 @@
+#Testting on local machine or a Selenium hub
+#in case below property is empty, tests will be executed on local machine.
+#selenium.hubUrl = http://172.16.1.18:5050/wd/hub
+#selenium.hubUrl = http://localhost:5050/wd/hub
+
+#Application url & login details
+#application.url = http://verisk.uksouth.cloudapp.azure.com/application/login.htm
+#application.url = http://172.50.3.9:11080/fintellix
+#application.url = http://172.50.3.9:15080/bizscore
+#application.url = http://172.50.3.9:16080/application/
+#application.url = http://test-appsvr.icreate.bi:6060/fintellix/
+application.url = https://devmdc.lloyds.com
+#application.url = http://172.50.3.3:8080/bizscore/
+
+#buildnumber = 0000108
+
+buildnumber = 22-09-2018
+ 
+#application.userid = PerfTestUser1
+application.userid = admin
+application.password = Welcome1
+
+mdc.portalName = MDC Portal
+
+admin2=mtest
+
+application.userChecker = admin
+application.userMaker = magent2
+
+test.classRoot = com.fintellix.test.platformtests.PageClasses.
+#test.datafile = D:\\ProjectsShared\\platform_Lloyds_performanceScenarios.xlsx
+test.datafile = D:\\work\\TestAutomationScripts\\Platform-TestScripts-TermsandConditions.xlsx
+
+#Testing configurations supported browsers are IE, chrome and firefox
+#valid values chrome, firefox, internet explorer, phantomjs
+test.browser = chrome
+
+#if parallel executions are enabled, multiple tests will run simultaneously, otherwise they follow sequential order.
+test.enableParallelExecution = false
+test.numberOfparallelTests = 4
+test.timeoutInSeconds = 15
+test.caputureScreenOnFailure = true
+test.caputureScreenOnSuccess = false
+#valid values are from 1 to 10, 1 being least logs and 10 being most logs.
+test.log.verbose.level = 3
+
+
+
+#ATU Reporting related switches.
+#if tests are run in parallel mode, ATU reports will not be supported.
+test.atu.enableATUReporting = true
+test.atu.enableStepLevelReporting = true
+test.atu.enableStepLevelScreenShot = true
+
+#download directory path
+test.downloadDir = //download path will be created at platform Target folder at run time
+
+#upload directory path
+test.uploadDir = ../../Uploads
+
+#upload Reference files for presetup
+test.uploadReferences = ../../uploadReferences
+
+
+
+#Genereal application properties
+
+
+
+
+
+app.Organization4=ST-M001
+
+app.Organization=ST-S000
+app.Organization1 =Syndicate S000
+app.organization1.orgCode=2005
+
+app.Organization2= Lloyd's Corporation
+app.Organization3=ST-S001
+
+
+app.user.managingAgentuser=TestAzureMDC2@lloydsoflondon.onmicrosoft.com
+app.password.managingAgent=Goldstone1!
+
+app.yearofaccount=2018
+app.yearofaccount1=2019
+
+app.user.managingAgentuser1=TestAzureMDC2@lloydsoflondon.onmicrosoft.com
+app.password.managingAgent1=Goldstone1!
+
+app.user.uam.lloydsuser=ext_mdc_sectest4@lloyds.com
+app.user.uam.managingAgentUser=ext_mdc_sectest1@lloyds.com
+
+app.user.lloydsuser=ext_mdc_sectest3@lloyds.com
+app.user.lloydsuser1=ext_mdc_sectest2@lloyds.com
+
+app.password.lloydsuser=Password123
+
+#UAM PROPERTIES
+app.mcdportal=MDC Portal
+
+app.uam.username=ext mdc  sectest1
+app.uam.username1=ext mdc sectest4
+app.uam.username2=ext mdc sectest3
+app.uam.username3=ext mdc sectest2
+
+
+
+#document library
+app.openurl.documentlibrarylandingpage=https://devmdc.lloyds.com/mdc/collaboration.htm?random=1&concatenatedParentIds=4
+
+
+
+
+#EditCheck properties
+app.openURL.showXleratorArtefactList =https://devmdc.lloyds.com/mdc/showXLeratorArtefactList.htm?random=1&concatenatedParentIds=3
+
+app.openurl.editchecklandingpage=https://devmdc.lloyds.com/mdc/editchecklandingpagev2.htm?random=1&concatenatedParentIds=5-22
+
+app.openUrl.editchecklandingpagev2=https://devmdc.lloyds.com/mdc/editchecklandingpagev2.htm?random=1&concatenatedParentIds=5-22
+
+app.showXLeratorArtefactList1=https://devmdc.lloyds.com/mdc/showXLeratorArtefactList.htm?random=1&concatenatedParentIds=3
+
+app.loadworkflowtaskpage=https://devmdc.lloyds.com/mdc/loadworkflowtaskpage.htm?random=1&concatenatedParentIds=2-26
+
+
+#UAM properties
+app.admuserslandingpage=https://devmdc.lloyds.com/mdc/admuserslandingpage.htm?random=1&concatenatedParentIds=7-15
+#Organization Types
+app.admorgtypeslandingpage=https://devmdc.lloyds.com/mdc/admorgtypeslandingpage.htm?random=1&concatenatedParentIds=7-10
+#Organizations
+app.admorganizationslandingpage=https://devmdc.lloyds.com/mdc/admorganizationslandingpage.htm?random=1&concatenatedParentIds=7-13
+#Permission Schemes
+app.admpermissionschemelandingpage=https://devmdc.lloyds.com/mdc/admpermissionschemelandingpage.htm?random=1&concatenatedParentIds=7-12
+#accessrole
+app.admaccessrolelandingpage=https://devmdc.lloyds.com/mdc/admaccessrolelandingpage.htm?random=1&concatenatedParentIds=7-14
+#users
+app.admuserslandingpage=https://devmdc.lloyds.com/mdc/admuserslandingpage.htm?random=1&concatenatedParentIds=7-15
+
+#Devolved Administration
+app.admdevolveduserslandingpage=https://devmdc.lloyds.com/mdc/admdevolveduserslandingpage.htm?random=1&concatenatedParentIds=8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#properties for Terms and conditions module
+app.admtermsandconditionlandingpage=https://devmdc.lloyds.com/mdc/admtermsandconditionscreateandeditpage.htm?random=1&concatenatedParentIds=7-73
+app.user.lloydsusertermsandcondition=ext_mdc_sectest3@lloyds.com
+app.user.ManagingAgentusertermsandcondition=ext_mdc_sectest1@lloyds.com

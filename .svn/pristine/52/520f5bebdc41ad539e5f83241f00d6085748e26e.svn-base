@@ -1,0 +1,238 @@
+package com.fintellix.test.automation;
+
+import org.testng.annotations.Test;
+
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.ITest;
+import org.testng.ITestResult;
+import org.testng.Reporter;
+import org.testng.annotations.*;
+
+import com.fintellix.test.automation.utils.BrowserCommands;
+import com.fintellix.test.automation.utils.CustomPriorityInterceptor;
+import com.fintellix.test.automation.utils.TestProperties;
+import com.fintellix.test.automation.utils.WebDriverFactory;
+
+import atu.testng.reports.ATUReports;
+import atu.testng.reports.logging.LogAs;
+import atu.testng.selenium.reports.CaptureScreen;
+import atu.testng.selenium.reports.CaptureScreen.ScreenshotOf;
+
+@Listeners({ CustomPriorityInterceptor.class })
+public class BrowserTestRunner implements ITest {
+	private static final String SCREEN_CAPUTURE_DIR = "ScreenShots";
+	protected TestCase testCase;
+	protected TestStep testStep;
+	protected WebDriver driver;
+	protected StringBuffer verificationErrors = new StringBuffer();
+	protected String hubUrl, browser, appUrl, userid, password;
+	private String testName;
+	public int priority;
+	private ArrayList<TestStep> preTestSteps;
+	private ArrayList<TestStep> postTestSteps;
+	private HashMap<String, ArrayList<TestStep>> customCommands;
+	private BrowserCommands browserCommands;
+	private boolean enableATUDetailLog;
+	private boolean enableStepLevelScreenShot;
+
+	Logger logger = LoggerFactory.getLogger(BrowserTestRunner.class);
+
+	public BrowserTestRunner(TestCase testCase) {
+		this.testCase = testCase;
+		this.testName = this.testCase.getTestCaseId() + "_"	+ this.testCase.getTestCaseName();
+		this.priority = this.testCase.getPriority();
+		this.browserCommands = new BrowserCommands();
+		try {
+			enableATUDetailLog = Boolean.parseBoolean(TestProperties.getProperty("test.atu.enableStepLevelReporting"));
+			enableStepLevelScreenShot = Boolean
+					.parseBoolean(TestProperties.getProperty("test.atu.enableStepLevelScreenShot"));
+		} catch (Exception e) {
+			enableATUDetailLog = false;
+		}
+	}
+
+	public BrowserTestRunner(TestCase testCase, ArrayList<TestStep> preTestSteps, ArrayList<TestStep> postTestSteps,
+			HashMap<String, ArrayList<TestStep>> customCommands) {
+		this(testCase);
+		this.preTestSteps = preTestSteps;
+		this.postTestSteps = postTestSteps;
+		this.customCommands = customCommands;
+		this.browserCommands.setCustomCommands(customCommands);
+	}
+
+	public String getTestName() {
+		return this.testName;
+	}
+
+	@BeforeMethod(alwaysRun = true)
+	public void setUpTests() throws Throwable {
+		logger.debug("Start method: setUpBeforeClass ");
+		driver = WebDriverFactory.getWebDriver();
+		//uncommented below line on 6th Aug
+		driver.manage().deleteAllCookies();//code added to delete to cookies added on 22nd june 2018
+	
+		if(WebDriverFactory.systemOSName.startsWith("windows")) {
+			driver.manage().window().maximize();
+		}
+		else {
+			Dimension d = new Dimension(1366,768);
+			driver.manage().window().setSize(d);
+		}
+		/*try
+		{
+			System.out.println("in method");
+		WebDriverWait wait = new WebDriverWait(driver, 2);
+		wait.until(ExpectedConditions.alertIsPresent());
+		driver.switchTo().alert().accept();
+		}catch(Exception e) {
+			System.out.println("No - alerts");
+		}*/
+		ATUReports.setWebDriver(driver);
+		try {
+			if (null != preTestSteps) {
+				logger.debug("Execution pre-test steps");
+				for (TestStep preStep : preTestSteps) {
+					logger.debug("Executing " + preStep);
+					browserCommands.executeCommand(driver, preStep);
+				}
+			}
+		} catch (Exception e) {
+			if (enableATUDetailLog) {
+				ATUReports.add("Pre Test Set up", LogAs.FAILED,
+						(enableStepLevelScreenShot ? new CaptureScreen(ScreenshotOf.BROWSER_PAGE) : null));
+			}
+
+		}
+	}
+	
+	/*@BeforeTest
+	public void beforeExecuteTest() {
+		try
+		{
+			System.out.println("in mathod");
+		WebDriverWait wait = new WebDriverWait(driver, 2);
+		wait.until(ExpectedConditions.alertIsPresent());
+		driver.switchTo().alert().accept();
+		}catch(Exception e) {
+			System.out.println("No - alerts");
+		}
+	}
+*/
+	@Test
+	public void executeTest() throws Throwable {
+		ArrayList<Object[]> timeLog = new ArrayList<Object[]>();
+		long start, finish;
+		ArrayList<TestStep> testSteps = this.testCase.getTestSteps();
+		logger.info("Executing test " + this.testName);
+		try {
+			for (TestStep testStep : testSteps) {
+				logger.debug("Executing " + testStep);
+				start = System.currentTimeMillis();
+				browserCommands.executeCommand(driver, testStep);
+				finish = System.currentTimeMillis();
+				CaptureScreen var = enableStepLevelScreenShot ? new CaptureScreen(ScreenshotOf.BROWSER_PAGE) : null;
+				//System.out.println(var.isCaptureBrowserPage()+"<<<<<execute test>>>>>>");
+				if (enableATUDetailLog) {
+					/*ATUReports.add(testStep.toString(), LogAs.INFO,
+							(enableStepLevelScreenShot ? new CaptureScreen(ScreenshotOf.BROWSER_PAGE) : null));*/
+					ATUReports.add(testStep.getTestCaseDescription(), testStep.toString(),LogAs.INFO,
+							var);
+				}
+				timeLog.add(new Object[] { testStep.getCommand(), start, (finish - start) });
+			}
+		} finally {
+			ITestResult testResult = Reporter.getCurrentTestResult();
+			testResult.setAttribute("timeLog", timeLog);
+			testResult.setAttribute("testCaseListName",this.testCase.getTestCaseListName());
+			testResult.setAttribute("testCaseId",this.testCase.getTestCaseId());
+			//adding
+			testResult.setAttribute("testCaseName", this.testCase.getTestCaseName());
+			//testResult.setAttribute("testCaseName",this.testStep.getTestCaseName());
+		}
+
+	}
+
+	@AfterMethod(alwaysRun = true)
+	public void tearDown(ITestResult iResult) throws Throwable {
+		try {
+			TestResult testResult = new TestResult();
+			testResult.setTestCaseId(testCase.getTestCaseId());
+			testResult.setTestCaseName(testCase.getTestCaseName());
+			testResult.setTestCaseListName(testCase.getTestCaseListName());
+			testResult.setTestResult(iResult.getStatus());
+			TestResultList.addTestResult(testResult);
+
+			if ((iResult.getStatus() == ITestResult.FAILURE && TestProperties.caputureScreenOnFailure)
+					|| (iResult.getStatus() == ITestResult.SUCCESS && TestProperties.caputureScreenOnSuccess)) {
+				String result = iResult.getStatus() == ITestResult.FAILURE ? "Fail" : "Success";
+				File imageFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+				String fileName = SCREEN_CAPUTURE_DIR + File.separator
+						+ new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()) + "_" + testName.replaceAll(":", "_")
+						+ "_" + result + ".png";
+				try {
+					FileUtils.copyFile(imageFile, new File(fileName));
+					logger.debug("Caputtured screen shot" + fileName);
+					CaptureScreen var = new CaptureScreen(ScreenshotOf.BROWSER_PAGE);
+					//System.out.println(var.isCaptureBrowserPage()+"<<<tear down>>>");
+					if (enableATUDetailLog) {
+						ATUReports.add(testName, result, LogAs.FAILED, var);
+					}
+				} catch (Exception e) {
+					logger.error("Failed to save captured screen shot", e);
+				}
+			}
+			try {
+				if (null != postTestSteps) {
+					driver.switchTo().defaultContent();
+					driver.navigate().refresh();
+				
+					driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+					logger.debug("Execution post-test steps");
+					for (TestStep postStep : postTestSteps) {
+						logger.debug("Executing " + postStep);
+						driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+						browserCommands.executeCommand(driver, postStep);
+						driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Failure in post steps execution. " + testCase.getTestCaseId(), e);
+			}
+		} catch (Exception e) {
+			logger.error("Error in post execution method", e);
+		} finally {
+			 
+			 driver.manage().deleteAllCookies();
+			 WebDriverFactory.releaseDriver(driver);
+			logger.debug("Skip dismiss driver");
+		}
+
+	}
+
+}

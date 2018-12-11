@@ -1,0 +1,16 @@
+/*
+All the code that follow is
+Copyright (c) {{copyright.year}}, {{copyright.claimant}}. All Rights Reserved.
+Not for reuse without permission.
+*/
+
+
+{{#attributes}}
+{{#if attribute.strategy}}
+{{attribute.name}} = {{attribute.strategy}}:{{attribute.value}}
+{{else}}
+{{attribute.name}} = TODO:"{{{attribute.value}}}";
+{{/if}}
+{{/attributes}}
+
+
